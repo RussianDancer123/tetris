@@ -317,28 +317,7 @@ void rotate(){
 
 }
 
-void move(int x) {
-    Brick &b = v.back();
-    int n = 0;
-
-    switch (x) {
-        case KEY_RIGHT:
-            n = 1;
-            break;
-        case KEY_LEFT:
-            n = -1;
-            break;
-        case KEY_DOWN:
-            fall();
-            break;
-        case KEY_UP:
-            rotate();
-            return;
-        default:
-            return;
-    }
-
-
+void sideMove(int n, Brick& b){
     Square ymin = b.tab[0];
     for(auto i: b.tab){
         if(i.y<ymin.y)
@@ -369,6 +348,27 @@ void move(int x) {
         for(auto &i : b.tab){
             i.y+=n;
         }
+    }
+}
+
+void move(int x) {
+    Brick &b = v.back();
+
+    switch (x) {
+        case KEY_RIGHT:
+            sideMove(1, b);
+            break;
+        case KEY_LEFT:
+            sideMove(-1, b);
+            break;
+        case KEY_DOWN:
+            fall();
+            break;
+        case KEY_UP:
+            rotate();
+            return;
+        default:
+            return;
     }
 
     flushinp();
