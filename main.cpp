@@ -313,7 +313,16 @@ void fall(){
 
 void rotate(){
     Brick b = v.back();
+    const int n=3, m=2;
+    int tmpTab[n][m] = {{1, 0},
+                        {1, 1},
+                        {1, 0}};
 
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            ::tab[j][i] = tmpTab[i][j];
+        }
+    }
 
 }
 
@@ -353,6 +362,7 @@ void sideMove(int n, Brick& b){
 
 void move(int x) {
     Brick &b = v.back();
+
 
     switch (x) {
         case KEY_RIGHT:
