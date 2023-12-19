@@ -42,6 +42,7 @@ class Brick{
 public:
 
     Square tab[4] = {Square(), Square(), Square(), Square()};
+    int color;
 
     static int ran(){
         return 1+(rand()%10);
@@ -312,17 +313,55 @@ void fall(){
 }
 
 void rotate(){
-    Brick b = v.back();
-    const int n=3, m=2;
-    int tmpTab[n][m] = {{1, 0},
-                        {1, 1},
-                        {1, 0}};
+    Brick &b = v.back();
+    const int n=4, m=4;
+    int tmpTab[n][m] = {{0, 0, 0, 0},
+                        {0, 0, 0, 0},
+                        {0, 0, 0, 0},
+                        {0, 0, 0, 0}};
 
+
+    //min x, y
+    int xOff, yOff;
+    Square ymin = b.tab[0];
+    for(auto i: b.tab){
+        if(i.y<ymin.y)
+            ymin = i;
+    }
+
+    Square xmin = b.tab[0];
+    for(auto i: b.tab){
+        if(i.x<xmin.x)
+            xmin = i;
+    }
+
+    //offset przesuwa do (0, 0) w lewym gornym rogu aby dac do tablicy 4x4 a pozniej przesowa
+    //z powrotem na miejsce
+    xOff = xmin.x;
+    yOff = ymin.y;
+
+    for(auto i : b.tab){
+        tmpTab[(i.x)-xOff][(i.y)-yOff] = 1;
+    }
+
+    int tmpTab2[n][m]={0};
     for(int i = 0; i < n; i++){
         for(int j = 0; j < m; j++){
-            ::tab[j][i] = tmpTab[i][j];
+            tmpTab2[j][i] = tmpTab[3-i][j];
         }
     }
+
+    int x = 0;
+    for(int i = 0; i < n; i++){
+        for(int j = 0; j < m; j++){
+            if(tmpTab2[i][j]==1){
+                b.tab[x].x = i+xOff;
+                b.tab[x].y = j+yOff;
+                x++;
+            }
+        }
+    }
+
 
 }
 
@@ -362,7 +401,6 @@ void sideMove(int n, Brick& b){
 
 void move(int x) {
     Brick &b = v.back();
-
 
     switch (x) {
         case KEY_RIGHT:
@@ -415,6 +453,8 @@ void chkfail(){
 int main() {
     srand((unsigned)time(NULL));
     initPoint();
+
+
 
     noecho();
     //zmiana rozmiaru terminala
