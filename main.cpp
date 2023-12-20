@@ -20,14 +20,7 @@ std::vector<Brick> v;
 
 
 //----------move all down after scoring
-void movedown(int p) {
-    for (auto &b: v) {
-        for (auto &s: b.tab) {
-            if (s.x < p && s.x>0)
-                s.x += 1;
-        }
-    }
-}
+
 
 void chkscore(){
     for(int i = 0; i < 20; i++) {
@@ -39,8 +32,8 @@ void chkscore(){
         if (score) {
             ::score += 100;
             for(auto &b : v){
-                for (auto &s: b.tab) {
-                    if(s.x==i) {
+                for (int i = 0; i < 4; i++) {
+                    if(b.tab[i].x==i) {
                         s = Square(-1, -1);
                     }
                 }
