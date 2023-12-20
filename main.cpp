@@ -4,7 +4,7 @@
 #include <curses.h>
 #include <cstdlib>
 
-int tab[20][10] = {0};
+int tab[20][10][2] = {0};
 int pointx[20] = {};
 int pointy[10] = {};
 int next;
@@ -21,6 +21,16 @@ void initPoint(){
     for(int j = 0; j < 10; j++){
         ::pointy[j] = (4*j)+1;
     }
+}
+
+void initColors(){
+    start_color();
+    // i zdefiniować pary kolorów które będziemy używać
+    init_pair(1, COLOR_BLUE, COLOR_BLUE);
+    init_pair(2, COLOR_GREEN, COLOR_GREEN);
+    init_pair(3, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(4, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(5, COLOR_RED, COLOR_RED);
 }
 
 class Square{
@@ -52,6 +62,10 @@ public:
         return y-n<0? y: y-n;
     }
 
+    void setColor(){
+        color = 1+(rand()%5);
+    }
+
 };
 
 class I : public Brick {
@@ -59,6 +73,9 @@ public:
     int x = 0, y, n = 4;
 
     I(int y = ran()) {
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for (int i = 0; i < 4; i++) {
             tab[i].x = x;
@@ -71,6 +88,9 @@ class L : public Brick{
 public:
     int x = 0, y, n = 2;
     L(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x + i - (i/3);
@@ -83,6 +103,9 @@ class J : public Brick{
 public:
     int x = 0, y, n = 2;
     J(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x + i - (i/3);
@@ -95,6 +118,9 @@ class O : public Brick{
 public:
     int x = 0, y, n = 2;
     O(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x+i/2;
@@ -107,6 +133,9 @@ class S : public Brick{
 public:
     int x = 0, y, n = 3;
     S(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x + ((4-i)/3);
@@ -119,6 +148,9 @@ class Z : public Brick{
 public:
     int x = 0, y, n = 3;
     Z(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x + ((1+i)/3);
@@ -131,6 +163,9 @@ class T : public Brick{
 public:
     int x = 0, y, n = 3;
     T(int y = ran()){
+        //color
+        setColor();
+
         this->y = chkY(y, n);
         for(int i = 0; i < 4; ++i) {
             tab[i].x = x + ((1+i)/3 - (i/3));
@@ -156,7 +191,7 @@ void chkscore(){
     for(int i = 0; i < 20; i++) {
         bool score = true;
         for (int j = 0; j < 10; j++) {
-            if (::tab[i][j] != 1)
+            if (::tab[i][j][0] != 1)
                 score = false;
         }
         if (score) {
@@ -214,12 +249,17 @@ public:
         box(mainwin, 0, 0);
         mvwprintw(mainwin, 0, 1, "Tetris");
 
+        start_color();
+
+        initColors();
 
         for(int i = 0; i < 20; i++)
             for(int j = 0; j < 10; j++)
-                if(::tab[i][j]==1) {
+                if(::tab[i][j][0]==1) {
+                    wattron(mainwin, COLOR_PAIR(::tab[i][j][1]));
                     mvwprintw(mainwin, ::pointx[i], ::pointy[j], "****");
                     mvwprintw(mainwin, ::pointx[i]+1, ::pointy[j], "****");
+                    wattroff(mainwin, COLOR_PAIR(::tab[i][j][1]));
                 }
     }
 };
@@ -266,16 +306,20 @@ void fillTab(){
     for (auto& i : v) {
         for(auto& j : i.tab){
             if(j.x>=0)
-            ::tab[j.x][j.y] = 1;
+            ::tab[j.x][j.y][0] = 1;
+            ::tab[j.x][j.y][1] = i.color;
         }
     }
 
 }
 
 void eraseTab(){
+    //----------------------------------------------clean everything
     for (auto & i : ::tab)
-        for (int & j : i)
-            j = 0;
+        for (auto & j : i)
+            j[0] = 0;
+
+
 }
 
 void fall(){
@@ -293,7 +337,7 @@ void fall(){
     }
 
     for(auto i : b.tab){
-        if(tab[i.x+1][i.y]==1){
+        if(tab[i.x+1][i.y][0]==1){
             bool stop = true;
             for(auto j : b.tab){
                 if(i.x+1 == j.x && i.y == j.y)
@@ -382,7 +426,7 @@ void sideMove(int n, Brick& b){
     if(ymin.y+n >= 0 && ymax.y+n <= 9) {
 
         for(auto i : b.tab){
-            if(tab[i.x][i.y+n] == 1){
+            if(tab[i.x][i.y+n][0] == 1){
                 bool sk = true;
                 for(auto j : b.tab){
                     if(i.x == j.x && i.y+n == j.y)
@@ -453,12 +497,11 @@ void chkfail(){
 int main() {
     srand((unsigned)time(NULL));
     initPoint();
-
-
+    initColors();
 
     noecho();
     //zmiana rozmiaru terminala
-    std::cout<<"\e[8;45;80t";
+    std::cout<<"\e[8;45;79t";
 
     initscr();
     curs_set(0);
@@ -497,7 +540,7 @@ int main() {
         //debug
         for(int i = 0; i < 20; i++){
             for(int j = 0; j < 10; j++){
-                mvwaddch(scorewin.scorewin, i+1, j+1, char(tab[i][j]+48));
+                mvwaddch(scorewin.scorewin, i+1, j+1, char(tab[i][j][0]+48));
             }
         }
 
