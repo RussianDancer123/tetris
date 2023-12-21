@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <curses.h>
 #include <cstdlib>
+#include <cmath>
 #include "headers.h"
 
 int tab[20][10][2] = {0};
@@ -31,13 +32,8 @@ void chkscore(){
         }
         if (score) {
             ::score += 100;
-            for(auto &b : v){
-                for (int i = 0; i < 4; i++) {
-                    if(b.tab[i].x==i) {
-                        s = Square(-1, -1);
-                    }
-                }
-            }
+            deleteRow(i);
+            usleep(slep);
             movedown(i);
         }
     }
@@ -146,95 +142,6 @@ void eraseTab(){
 
 }
 
-
-
-void rotate(){
-    Brick &b = v.back();
-    const int n=4, m=4;
-    int tmpTab[n][m] = {{0, 0, 0, 0},
-                        {0, 0, 0, 0},
-                        {0, 0, 0, 0},
-                        {0, 0, 0, 0}};
-
-
-    //min x, y
-    int xOff, yOff;
-    Square ymin = b.tab[0];
-    for(auto i: b.tab){
-        if(i.y<ymin.y)
-            ymin = i;
-    }
-
-    Square xmin = b.tab[0];
-    for(auto i: b.tab){
-        if(i.x<xmin.x)
-            xmin = i;
-    }
-
-    //offset przesuwa do (0, 0) w lewym gornym rogu aby dac do tablicy 4x4 a pozniej przesowa
-    //z powrotem na miejsce
-    xOff = xmin.x;
-    yOff = ymin.y;
-
-    for(auto i : b.tab){
-        tmpTab[(i.x)-xOff][(i.y)-yOff] = 1;
-    }
-
-    int tmpTab2[n][m]={0};
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < m; j++){
-            tmpTab2[j][i] = tmpTab[3-i][j];
-        }
-    }
-
-    int x = 0;
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < m; j++){
-            if(tmpTab2[i][j]==1){
-                b.tab[x].x = i+xOff;
-                b.tab[x].y = j+yOff;
-                x++;
-            }
-        }
-    }
-
-
-}
-
-void sideMove(int n, Brick& b){
-    Square ymin = b.tab[0];
-    for(auto i: b.tab){
-        if(i.y<ymin.y)
-            ymin = i;
-    }
-
-    Square ymax = b.tab[0];
-    for(auto i: b.tab){
-        if(i.y>ymax.y)
-            ymax = i;
-    }
-
-
-    if(ymin.y+n >= 0 && ymax.y+n <= 9) {
-
-        for(auto i : b.tab){
-            if(tab[i.x][i.y+n][0] == 1){
-                bool sk = true;
-                for(auto j : b.tab){
-                    if(i.x == j.x && i.y+n == j.y)
-                        sk = false;
-                }
-                if(sk)
-                    return;
-            }
-        }
-
-        for(auto &i : b.tab){
-            i.y+=n;
-        }
-    }
-}
-
 void move(int x) {
     Brick &b = v.back();
 
@@ -270,21 +177,7 @@ void death(){
     }
 }
 
-void chkfail(){
-    if(v.size()==1)
-        return;
-    Brick &b = v.end()[-2];
 
-    Square smin = b.tab[0];
-
-    for(auto i: b.tab){
-        if(i.x<smin.x && i.x>=0) smin = i;
-    }
-
-    if(smin.x == 0){
-        death();
-    }
-}
 
 int main() {
     srand((unsigned)time(NULL));
