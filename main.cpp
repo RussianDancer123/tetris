@@ -138,8 +138,6 @@ void eraseTab(){
     for (auto & i : ::tab)
         for (auto & j : i)
             j[0] = 0;
-
-
 }
 
 void move(int x) {
@@ -157,7 +155,7 @@ void move(int x) {
             break;
         case KEY_UP:
             rotate();
-            return;
+            break;
         default:
             return;
     }
