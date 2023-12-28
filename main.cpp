@@ -16,6 +16,127 @@ int score = 0;
 int slep = 1000;
 int skip = 400;
 
+struct {
+    int pos[4] = {
+            3, 10, 18, 25
+    };
+
+    void n0(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 0000 ");
+        mvwprintw(win, 6, pos, "00  00");
+        mvwprintw(win, 7, pos, "00  00");
+        mvwprintw(win, 8, pos, "00  00");
+        mvwprintw(win, 9, pos, " 0000 ");
+    }
+
+    void n1(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "1111  ");
+        mvwprintw(win, 6, pos, "  11  ");
+        mvwprintw(win, 7, pos, "  11  ");
+        mvwprintw(win, 8, pos, "  11  ");
+        mvwprintw(win, 9, pos, "111111");
+    }
+
+    void n2(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 2222 ");
+        mvwprintw(win, 6, pos, "22  22");
+        mvwprintw(win, 7, pos, "   22 ");
+        mvwprintw(win, 8, pos, "  22  ");
+        mvwprintw(win, 9, pos, "222222");
+    }
+
+    void n3(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 3333 ");
+        mvwprintw(win, 6, pos, "33  33");
+        mvwprintw(win, 7, pos, "   333");
+        mvwprintw(win, 8, pos, "33  33");
+        mvwprintw(win, 9, pos, " 3333 ");
+    }
+
+    void n4(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "44  44");
+        mvwprintw(win, 6, pos, "44  44");
+        mvwprintw(win, 7, pos, "444444");
+        mvwprintw(win, 8, pos, "    44");
+        mvwprintw(win, 9, pos, "    44");
+    }
+
+    void n5(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "555555");
+        mvwprintw(win, 6, pos, "55    ");
+        mvwprintw(win, 7, pos, "55555 ");
+        mvwprintw(win, 8, pos, "    55");
+        mvwprintw(win, 9, pos, "55555 ");
+    }
+
+    void n6(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 6666 ");
+        mvwprintw(win, 6, pos, "66    ");
+        mvwprintw(win, 7, pos, "66666 ");
+        mvwprintw(win, 8, pos, "66  66");
+        mvwprintw(win, 9, pos, " 6666 ");
+    }
+
+    void n7(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "777777");
+        mvwprintw(win, 6, pos, "   77 ");
+        mvwprintw(win, 7, pos, "  77  ");
+        mvwprintw(win, 8, pos, " 77   ");
+        mvwprintw(win, 9, pos, "77    ");
+    }
+
+    void n8(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 8888 ");
+        mvwprintw(win, 6, pos, "88  88");
+        mvwprintw(win, 7, pos, " 8888 ");
+        mvwprintw(win, 8, pos, "88  88");
+        mvwprintw(win, 9, pos, " 8888 ");
+    }
+
+    void n9(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 9999 ");
+        mvwprintw(win, 6, pos, "99  99");
+        mvwprintw(win, 7, pos, " 99999");
+        mvwprintw(win, 8, pos, "    99");
+        mvwprintw(win, 9, pos, " 9999 ");
+    }
+
+    void print(WINDOW * win, int num, int pos){
+        switch(num){
+            case 1:
+                n1(win, this->pos[pos]);
+                break;
+            case 2:
+                n2(win, this->pos[pos]);
+                break;
+            case 3:
+                n3(win, this->pos[pos]);
+                break;
+            case 4:
+                n4(win, this->pos[pos]);
+                break;
+            case 5:
+                n5(win, this->pos[pos]);
+                break;
+            case 6:
+                n6(win, this->pos[pos]);
+                break;
+            case 7:
+                n7(win, this->pos[pos]);
+                break;
+            case 8:
+                n8(win, this->pos[pos]);
+                break;
+            case 9:
+                n9(win, this->pos[pos]);
+                break;
+            default:
+                n0(win, this->pos[pos]);
+            break;
+        }
+
+    }
+}numbers;
 
 std::vector<Brick> v;
 
@@ -42,6 +163,8 @@ void chkscore(){
 void addBrick(){
     // 1-sprawdza i obniza reszte 2-
     chkscore();
+    if(v.size()>1)
+        chkfail();
 
     switch(next){
         case 0:
@@ -93,17 +216,90 @@ public:
                     wattroff(mainwin, COLOR_PAIR(::tab[i][j][1]));
                 }
     }
+
+    void printScore(WINDOW * win){
+        std::string s = std::to_string(score);
+        while(s.length() != 4)
+            s.insert(0, "0");
+
+
+        for(int i = 0; i < 4; i++)
+            numbers.print(win, int(s[i])-48, i);
+    }
 };
 
 class NextWindow : MainWindow {
 public:
     WINDOW * nextwin;
 
+    void square(int x, int y){
+        mvwprintw(nextwin, x, y, "******");
+        mvwprintw(nextwin, x+1, y, "******");
+        mvwprintw(nextwin, x+2, y, "******");
+    }
+
     void print() override{
         nextwin = newwin(12, 34, 0, 45);
         box(nextwin, 0, 0);
         mvwprintw(nextwin, 0, getmaxx(nextwin)/2-2, "Next");
-        mvwaddch(nextwin, 2, 2, char(::next+48));
+
+        start_color();
+        initColors();
+        wattron(nextwin, COLOR_PAIR(6));
+
+        switch(next){
+            case 0:
+                square(6, 8);
+                square(6, 14);
+                square(6, 20);
+                square(3, 20);
+                break;
+            case 1:
+
+                square(4, 5);
+                square(4, 11);
+                square(4, 17);
+                square(4, 23);
+                break;
+            case 2:
+
+                square(3, 11);
+                square(3, 17);
+                square(6, 11);
+                square(6, 17);
+                break;
+            case 3:
+
+                square(6, 8);
+                square(6, 14);
+                square(3, 14);
+                square(3, 20);
+                break;
+            case 4:
+
+                square(3, 8);
+                square(3, 14);
+                square(6, 14);
+                square(6, 20);
+                break;
+            case 5:
+
+                square(3, 8);
+                square(3, 14);
+                square(3, 20);
+                square(6, 20);
+                break;
+            case 6:
+
+                square(6, 8);
+                square(6, 14);
+                square(6, 20);
+                square(3, 14);
+                break;
+        }
+
+        wattroff(nextwin, COLOR_PAIR(6));
+
     }
 };
 
@@ -115,7 +311,9 @@ public:
         scorewin = newwin(30,34,12,45);
         box(scorewin, 0, 0);
         mvwprintw(scorewin, 0, getmaxx(scorewin)/2-2, "Score");
-        mvwprintw(scorewin, 4, getmaxx(scorewin)/2-+5, "%s", std::to_string(score).data());
+
+        printScore(scorewin);
+
     }
 };
 
@@ -124,12 +322,20 @@ public:
     WINDOW * deathwin;
 
     void print() override{
-        //center?
-        deathwin = newwin(7, 15, 15, 36);
+
+        deathwin = newwin(13, 34, 14, 26);
         box(deathwin, 0, 0);
+
+        start_color();
+        initColors();
+        wattron(deathwin, COLOR_PAIR(7));
+
         mvwprintw(deathwin, 0, getmaxx(deathwin)/2-2, "DEATH");
-        mvwprintw(deathwin, 2, getmaxx(deathwin)/2-2, "SCORE");
-        mvwprintw(deathwin, 4, getmaxx(deathwin)/2-2, "%s", std::to_string(score).data());
+        mvwprintw(deathwin, 2, getmaxx(deathwin)/2-2, "SCORE:");
+
+        wattroff(deathwin, COLOR_PAIR(7));
+        printScore(deathwin);
+
     }
 };
 
@@ -166,8 +372,7 @@ void move(int x) {
 void death(){
     DeathWindow deathwin = DeathWindow();
     clear();
-    std::cout<<"death";
-    ::game = false;
+    refresh();
     while(1==1){
         deathwin.print();
         wrefresh(deathwin.deathwin);
@@ -178,6 +383,7 @@ void death(){
 
 
 int main() {
+    //system("firefox https://www.youtube.com/watch?v=0Aq436MrS_o");
     srand((unsigned)time(NULL));
     initPoint();
     initColors();
@@ -221,11 +427,11 @@ int main() {
         wrefresh(nextwin.nextwin);
 
         //debug
-        for(int i = 0; i < 20; i++){
-            for(int j = 0; j < 10; j++){
-                mvwaddch(scorewin.scorewin, i+1, j+1, char(tab[i][j][0]+48));
-            }
-        }
+//        for(int i = 0; i < 20; i++){
+//            for(int j = 0; j < 10; j++){
+//                mvwaddch(scorewin.scorewin, i+1, j+1, char(tab[i][j][0]+48));
+//            }
+//        }
 
         wrefresh(scorewin.scorewin);
 
@@ -235,8 +441,6 @@ int main() {
         if(n%skip==0)
             fall();
         move(getch());
-
-        chkfail();
 
         eraseTab();
         fillTab();
