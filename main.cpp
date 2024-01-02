@@ -160,6 +160,7 @@ void chkscore(){
     }
 }
 
+
 void addBrick(){
     // 1-sprawdza i obniza reszte 2-
     chkscore();
