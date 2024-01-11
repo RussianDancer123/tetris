@@ -323,8 +323,22 @@ public:
         }
     }
 
+    bool chkRotateBig(int n){
+        if(n==0){
+            if(::tab[tab[0].x-2][tab[0].y+2][0]==1 || ::tab[tab[1].x-1][tab[1].y+1][0]==1 || ::tab[tab[3].x+1][tab[3].y-1][0]==1)
+                return true;
+        }else{
+            if(::tab[tab[0].x+2][tab[0].y-2][0]==1 || ::tab[tab[1].x+1][tab[1].y-1][0]==1 || ::tab[tab[3].x-1][tab[3].y+1][0]==1)
+                return true;
+        }
+
+        return false;
+    }
+
     void rotateBig(){
         if(tab[0].x - tab[1].x == 0){
+            if(chkRotateBig(0))
+                return;
             tab[0].x = tab[0].x-2;
             tab[0].y = tab[0].y+2;
             tab[1].x = tab[1].x-1;
@@ -332,6 +346,8 @@ public:
             tab[3].x = tab[3].x+1;
             tab[3].y = tab[3].y-1;
         }else{
+            if(chkRotateBig(1))
+                return;
             tab[0].x = tab[0].x+2;
             tab[0].y = tab[0].y-2;
             tab[1].x = tab[1].x+1;
@@ -379,17 +395,15 @@ public:
             }
         }
 
-        //-----------------------------------------------------athsjtkgsoritgmboi
-        bool collision = false;
+        //---------collision chk
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
-                if(::tab[i+xOff][j+yOff][0]==1 && chkSelf(i+xOff, j+yOff))
-                    collision = true;
+                //::tab[i+xOff][j+yOff][0]==1
+                if((tab2[i][j] == 1 && !chkBord(j+yOff)) || ((::tab[i+xOff][j+yOff][0] == 1 && tab2[i][j] == 1) && chkSelf(i+xOff, j+yOff)))
+                    return;
             }
         }
-        if(collision)
-            return;
-        //////////////////-----------------return do ifa
+        //----------
 
         int s = 0;
         for (int i = 0; i < 3; ++i) {
