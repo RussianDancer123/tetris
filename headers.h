@@ -11,6 +11,128 @@ extern int pointy[10];
 extern void addBrick();
 extern void death();
 
+struct {
+    int pos[4] = {
+            3, 10, 18, 25
+    };
+
+    void n0(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 0000 ");
+        mvwprintw(win, 6, pos, "00  00");
+        mvwprintw(win, 7, pos, "00  00");
+        mvwprintw(win, 8, pos, "00  00");
+        mvwprintw(win, 9, pos, " 0000 ");
+    }
+
+    void n1(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "1111  ");
+        mvwprintw(win, 6, pos, "  11  ");
+        mvwprintw(win, 7, pos, "  11  ");
+        mvwprintw(win, 8, pos, "  11  ");
+        mvwprintw(win, 9, pos, "111111");
+    }
+
+    void n2(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 2222 ");
+        mvwprintw(win, 6, pos, "22  22");
+        mvwprintw(win, 7, pos, "   22 ");
+        mvwprintw(win, 8, pos, "  22  ");
+        mvwprintw(win, 9, pos, "222222");
+    }
+
+    void n3(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 3333 ");
+        mvwprintw(win, 6, pos, "33  33");
+        mvwprintw(win, 7, pos, "   333");
+        mvwprintw(win, 8, pos, "33  33");
+        mvwprintw(win, 9, pos, " 3333 ");
+    }
+
+    void n4(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "44  44");
+        mvwprintw(win, 6, pos, "44  44");
+        mvwprintw(win, 7, pos, "444444");
+        mvwprintw(win, 8, pos, "    44");
+        mvwprintw(win, 9, pos, "    44");
+    }
+
+    void n5(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "555555");
+        mvwprintw(win, 6, pos, "55    ");
+        mvwprintw(win, 7, pos, "55555 ");
+        mvwprintw(win, 8, pos, "    55");
+        mvwprintw(win, 9, pos, "55555 ");
+    }
+
+    void n6(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 6666 ");
+        mvwprintw(win, 6, pos, "66    ");
+        mvwprintw(win, 7, pos, "66666 ");
+        mvwprintw(win, 8, pos, "66  66");
+        mvwprintw(win, 9, pos, " 6666 ");
+    }
+
+    void n7(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, "777777");
+        mvwprintw(win, 6, pos, "   77 ");
+        mvwprintw(win, 7, pos, "  77  ");
+        mvwprintw(win, 8, pos, " 77   ");
+        mvwprintw(win, 9, pos, "77    ");
+    }
+
+    void n8(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 8888 ");
+        mvwprintw(win, 6, pos, "88  88");
+        mvwprintw(win, 7, pos, " 8888 ");
+        mvwprintw(win, 8, pos, "88  88");
+        mvwprintw(win, 9, pos, " 8888 ");
+    }
+
+    void n9(WINDOW * win, int pos){
+        mvwprintw(win, 5, pos, " 9999 ");
+        mvwprintw(win, 6, pos, "99  99");
+        mvwprintw(win, 7, pos, " 99999");
+        mvwprintw(win, 8, pos, "    99");
+        mvwprintw(win, 9, pos, " 9999 ");
+    }
+
+    void print(WINDOW * win, int num, int pos){
+        switch(num){
+            case 1:
+                n1(win, this->pos[pos]);
+                break;
+            case 2:
+                n2(win, this->pos[pos]);
+                break;
+            case 3:
+                n3(win, this->pos[pos]);
+                break;
+            case 4:
+                n4(win, this->pos[pos]);
+                break;
+            case 5:
+                n5(win, this->pos[pos]);
+                break;
+            case 6:
+                n6(win, this->pos[pos]);
+                break;
+            case 7:
+                n7(win, this->pos[pos]);
+                break;
+            case 8:
+                n8(win, this->pos[pos]);
+                break;
+            case 9:
+                n9(win, this->pos[pos]);
+                break;
+            default:
+                n0(win, this->pos[pos]);
+                break;
+        }
+
+    }
+}numbers;
+
 void initPoint(){
     for(int i = 0; i < 20; i++){
         ::pointx[i] = (2*i)+1;
@@ -54,7 +176,7 @@ private:
     }
 
 protected:
-    int color, n;
+    int color;
 
     Square tab[4];
 
@@ -74,26 +196,21 @@ public:
 
     Brick(int x1, int x2, int x3, int x4, int y1, int y2, int y3, int y4, int type = 0, int center = 0){
 
+        int n = 0;
         do {
             int y = Brick::chkY(ran(), 4);
             tab[0] = Square(0 + x1, y + y1);
             tab[1] = Square(0 + x2, y + y2);
             tab[2] = Square(0 + x3, y + y3);
             tab[3] = Square(0 + x4, y + y4);
+            n++;
+            if(n>=50)
+                death();
         }while(chkCol());
 
         setColor();
         this->blockType = type;
         this->centerSquare = center;
-    }
-
-    ~Brick(){
-        //delete tab;
-        //delete centerSquare;
-    }
-
-    int getColor(){
-        return color;
     }
 
     static int ran(){
@@ -116,8 +233,8 @@ public:
     void fall(){
         Square smax = tab[0];
 
-        for(int i = 0; i < 4; i++) {
-            if(tab[i].x>smax.x) smax = tab[i];
+        for(auto & i : tab) {
+            if(i.x>smax.x) smax = i;
         }
 
         if(smax.x == 19) {
@@ -125,11 +242,11 @@ public:
             return;
         }
 
-        for(int i = 0; i < 4; i++){
-            if(::tab[tab[i].x+1][tab[i].y][0]==1){
+        for(auto & i : tab){
+            if(::tab[i.x+1][i.y][0]==1){
                 bool stop = true;
-                for(int j = 0; j < 4; j++){
-                    if(tab[i].x+1 == tab[j].x && tab[i].y == tab[j].y)
+                for(auto & j : tab){
+                    if(i.x+1 == j.x && i.y == j.y)
                         stop = false;
                 }
                 if(stop){
@@ -139,48 +256,48 @@ public:
             }
         }
 
-        for(int i = 0; i < 4; i++) {
-            tab[i].x++;
+        for(auto & i : tab) {
+            i.x++;
         }
 
     }
 
     void movedown(int p) {
-        for (int i = 0; i < 4; i++) {
-            if(tab[i].x < p && tab[i].x > 0)
-                tab[i].x += 1;
+        for (auto & i : tab) {
+            if(i.x < p && i.x > 0)
+                i.x += 1;
         }
     }
 
     void deleteRow(int p){
-        for(int i = 0; i < 4; i++){
-            if(tab[i].x == p)
-                tab[i].deleteSquare();
+        for(auto & i : tab){
+            if(i.x == p)
+                i.deleteSquare();
         }
     }
 
 
     void sideMove(int n){
         Square ymin = tab[0];
-        for(int i = 0; i < 4; i++){
-            if(tab[i].y<ymin.y)
-                ymin = tab[i];
+        for(auto & i : tab){
+            if(i.y<ymin.y)
+                ymin = i;
         }
 
         Square ymax = tab[0];
-        for(int i = 0; i < 4; i++){
-            if(tab[i].y>ymax.y)
-                ymax = tab[i];
+        for(auto & i : tab){
+            if(i.y>ymax.y)
+                ymax = i;
         }
 
 
         if(ymin.y+n >= 0 && ymax.y+n <= 9) {
 
-            for(int i = 0; i < 4; i++){
-                if(::tab[tab[i].x][tab[i].y+n][0] == 1){
+            for(auto & i : tab){
+                if(::tab[i.x][i.y+n][0] == 1){
                     bool sk = true;
-                    for(int j = 0; j < 4; j++){
-                        if(tab[i].x == tab[j].x && tab[i].y+n == tab[j].y)
+                    for(auto & j : tab){
+                        if(i.x == j.x && i.y+n == j.y)
                             sk = false;
                     }
                     if(sk)
@@ -188,8 +305,8 @@ public:
                 }
             }
 
-            for(int i = 0; i < 4; i++){
-                tab[i].y+=n;
+            for(auto & i : tab){
+                i.y+=n;
             }
         }
     }
@@ -197,8 +314,8 @@ public:
     void chkfail(){
         Square smin = tab[0];
 
-        for(int i = 0; i < 4; i++){
-            if(tab[i].x<smin.x && tab[i].x>=0) smin = tab[i];
+        for(auto & i : tab){
+            if(i.x<smin.x && i.x>=0) smin = i;
         }
 
         if(smin.x == 0){

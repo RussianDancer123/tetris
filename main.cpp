@@ -3,7 +3,6 @@
 #include <unistd.h>
 #include <curses.h>
 #include <cstdlib>
-#include <cmath>
 #include "headers.h"
 
 int tab[20][10][2] = {0};
@@ -15,128 +14,6 @@ int score = 0;
 
 int slep = 1000;
 int skip = 400;
-
-struct {
-    int pos[4] = {
-            3, 10, 18, 25
-    };
-
-    void n0(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 0000 ");
-        mvwprintw(win, 6, pos, "00  00");
-        mvwprintw(win, 7, pos, "00  00");
-        mvwprintw(win, 8, pos, "00  00");
-        mvwprintw(win, 9, pos, " 0000 ");
-    }
-
-    void n1(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, "1111  ");
-        mvwprintw(win, 6, pos, "  11  ");
-        mvwprintw(win, 7, pos, "  11  ");
-        mvwprintw(win, 8, pos, "  11  ");
-        mvwprintw(win, 9, pos, "111111");
-    }
-
-    void n2(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 2222 ");
-        mvwprintw(win, 6, pos, "22  22");
-        mvwprintw(win, 7, pos, "   22 ");
-        mvwprintw(win, 8, pos, "  22  ");
-        mvwprintw(win, 9, pos, "222222");
-    }
-
-    void n3(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 3333 ");
-        mvwprintw(win, 6, pos, "33  33");
-        mvwprintw(win, 7, pos, "   333");
-        mvwprintw(win, 8, pos, "33  33");
-        mvwprintw(win, 9, pos, " 3333 ");
-    }
-
-    void n4(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, "44  44");
-        mvwprintw(win, 6, pos, "44  44");
-        mvwprintw(win, 7, pos, "444444");
-        mvwprintw(win, 8, pos, "    44");
-        mvwprintw(win, 9, pos, "    44");
-    }
-
-    void n5(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, "555555");
-        mvwprintw(win, 6, pos, "55    ");
-        mvwprintw(win, 7, pos, "55555 ");
-        mvwprintw(win, 8, pos, "    55");
-        mvwprintw(win, 9, pos, "55555 ");
-    }
-
-    void n6(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 6666 ");
-        mvwprintw(win, 6, pos, "66    ");
-        mvwprintw(win, 7, pos, "66666 ");
-        mvwprintw(win, 8, pos, "66  66");
-        mvwprintw(win, 9, pos, " 6666 ");
-    }
-
-    void n7(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, "777777");
-        mvwprintw(win, 6, pos, "   77 ");
-        mvwprintw(win, 7, pos, "  77  ");
-        mvwprintw(win, 8, pos, " 77   ");
-        mvwprintw(win, 9, pos, "77    ");
-    }
-
-    void n8(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 8888 ");
-        mvwprintw(win, 6, pos, "88  88");
-        mvwprintw(win, 7, pos, " 8888 ");
-        mvwprintw(win, 8, pos, "88  88");
-        mvwprintw(win, 9, pos, " 8888 ");
-    }
-
-    void n9(WINDOW * win, int pos){
-        mvwprintw(win, 5, pos, " 9999 ");
-        mvwprintw(win, 6, pos, "99  99");
-        mvwprintw(win, 7, pos, " 99999");
-        mvwprintw(win, 8, pos, "    99");
-        mvwprintw(win, 9, pos, " 9999 ");
-    }
-
-    void print(WINDOW * win, int num, int pos){
-        switch(num){
-            case 1:
-                n1(win, this->pos[pos]);
-                break;
-            case 2:
-                n2(win, this->pos[pos]);
-                break;
-            case 3:
-                n3(win, this->pos[pos]);
-                break;
-            case 4:
-                n4(win, this->pos[pos]);
-                break;
-            case 5:
-                n5(win, this->pos[pos]);
-                break;
-            case 6:
-                n6(win, this->pos[pos]);
-                break;
-            case 7:
-                n7(win, this->pos[pos]);
-                break;
-            case 8:
-                n8(win, this->pos[pos]);
-                break;
-            case 9:
-                n9(win, this->pos[pos]);
-                break;
-            default:
-                n0(win, this->pos[pos]);
-            break;
-        }
-
-    }
-}numbers;
 
 std::vector<Brick> v;
 
@@ -239,16 +116,8 @@ public:
         mvwprintw(nextwin, x+2, y, "******");
     }
 
-    void print() override{
-        nextwin = newwin(12, 34, 0, 45);
-        box(nextwin, 0, 0);
-        mvwprintw(nextwin, 0, getmaxx(nextwin)/2-2, "Next");
-
-        start_color();
-        initColors();
-        wattron(nextwin, COLOR_PAIR(6));
-
-        switch(next){
+    void printBrick(int n){
+        switch(n){
             case 0:
                 square(6, 8);
                 square(6, 14);
@@ -298,6 +167,18 @@ public:
                 square(3, 14);
                 break;
         }
+    }
+
+    void print() override{
+        nextwin = newwin(12, 34, 0, 45);
+        box(nextwin, 0, 0);
+        mvwprintw(nextwin, 0, getmaxx(nextwin)/2-2, "Next");
+
+        start_color();
+        initColors();
+        wattron(nextwin, COLOR_PAIR(6));
+
+        printBrick(next);
 
         wattroff(nextwin, COLOR_PAIR(6));
 
