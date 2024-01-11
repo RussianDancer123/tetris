@@ -5,12 +5,14 @@
 #ifndef TETRISV4_HEADERS_H
 #define TETRISV4_HEADERS_H
 
+//referencje do zmiennych z innego pliku
 extern int tab[20][10][2];
 extern int pointx[20];
 extern int pointy[10];
 extern void addBrick();
 extern void death();
 
+//drukowanie numerkow
 struct {
     int pos[4] = {
             3, 10, 18, 25
@@ -133,6 +135,7 @@ struct {
     }
 }numbers;
 
+//init tablic z pozycjami w terminalu
 void initPoint(){
     for(int i = 0; i < 20; i++){
         ::pointx[i] = (2*i)+1;
@@ -142,6 +145,7 @@ void initPoint(){
     }
 }
 
+//init kolorkow - trzeba wywolac z kazdym powtorzeniem jesli drukujemy w petli
 void initColors(){
     start_color();
     init_pair(1, COLOR_BLUE, COLOR_BLUE);
@@ -153,6 +157,7 @@ void initColors(){
     init_pair(7, COLOR_RED, COLOR_BLACK);
 }
 
+//'pixel' klockow
 class Square{
 public:
     int x, y;
@@ -178,13 +183,16 @@ private:
 protected:
     int color;
 
+    //tablica square - pixeli
     Square tab[4];
 
 public:
 
+    //typ (kwadrat, plaski, zwykly) i srodkowy klocek do obrotow
     int blockType;
     int centerSquare;
 
+    //sprawdza czy mozna wydrukowac nowy klocek - nie wchodzi na inny
     bool chkCol(){
         bool res = false;
         for(auto i : tab){
@@ -196,6 +204,9 @@ public:
 
     Brick(int x1, int x2, int x3, int x4, int y1, int y2, int y3, int y4, int type = 0, int center = 0){
 
+        //dopoki nie mozna wydrukowac, losuje nowa pozycje
+        //po 50 powtorzeniach smierc (jesli zostanie wolna tylko ostatnia linijka, nie da sie wydrukowac klocka ani przegrac)
+        //chkY - sprawdza czy klocek nie wychodzi poza plansze, a jesli wychodzi to go cofa
         int n = 0;
         do {
             int y = Brick::chkY(ran(), 4);
@@ -208,19 +219,23 @@ public:
                 death();
         }while(chkCol());
 
+        //losuje kolor i przypisuje zmienne do obrotu
         setColor();
         this->blockType = type;
         this->centerSquare = center;
     }
 
+    //losowanie pozycji poczatkowej klocka
     static int ran(){
         return 1+(rand()%10);
     }
 
+    //sprawdza pozycje klocka
     static int chkY(int y, int n){
         return y-n<0? y: y-n;
     }
 
+    //zapelnia plansze na podstawie x i y square z klocka
     void fillTab(){
             for(int i = 0; i < 4; i++){
                 if(tab[i].x>=0)
@@ -230,6 +245,7 @@ public:
 
     }
 
+    //obniza klocek i sprawdza czy spadl/stanal na innym, oraz dodaje nowy
     void fall(){
         Square smax = tab[0];
 
@@ -262,6 +278,7 @@ public:
 
     }
 
+    //obniza klocki powyzej zapelnionego i usunietego rzedu
     void movedown(int p) {
         for (auto & i : tab) {
             if(i.x < p && i.x > 0)
@@ -269,6 +286,7 @@ public:
         }
     }
 
+    //usuwa zapelniony rzad - zostawia square ktore nie sa w tym rzedzie
     void deleteRow(int p){
         for(auto & i : tab){
             if(i.x == p)
@@ -277,6 +295,7 @@ public:
     }
 
 
+    //ruch w bok ze sprawdzaniem
     void sideMove(int n){
         Square ymin = tab[0];
         for(auto & i : tab){
@@ -311,6 +330,7 @@ public:
         }
     }
 
+    //sprawdza przegrana
     void chkfail(){
         Square smin = tab[0];
 
@@ -319,10 +339,12 @@ public:
         }
 
         if(smin.x == 0){
+            //przegrana
             death();
         }
     }
 
+    //sprawdza obrot klocka I
     bool chkRotateBig(int n){
         if(n==0){
             if(::tab[tab[0].x-2][tab[0].y+2][0]==1 || ::tab[tab[1].x-1][tab[1].y+1][0]==1 || ::tab[tab[3].x+1][tab[3].y-1][0]==1)
@@ -335,6 +357,7 @@ public:
         return false;
     }
 
+    //sprawdza i obraca klocek I
     void rotateBig(){
         if(tab[0].x - tab[1].x == 0){
             if(chkRotateBig(0))
@@ -357,6 +380,7 @@ public:
         }
     }
 
+    //sprawdza do obrotu, czy zajete pole to nie ten sam klocek
     bool chkSelf(int x, int y){
         bool res = false;
         for(auto i : tab){
@@ -366,13 +390,14 @@ public:
         return !res;
     }
 
-    //border chk - poza zakresem wraca na 0 ??????/AWD;asefokdrgsok
+    //sprawdza czy obrocony klocek jest w planszy
     static bool chkBord(int y){
         return (y >= 0 && y < 10);
     }
 
-
+    //obrot
     void rotate(){
+        //kwadrat - nie obraca, I - osobny obrot
         if(blockType == 2)
             return;
         else if(blockType == 3) {
@@ -382,6 +407,7 @@ public:
         int tab1[3][3] = {0};
         int tab2[3][3] = {0};
 
+        //offset - klocek wrzuca do tablicy 3x3 ze srodkiem w wybranym square klocka
         int xOff = tab[centerSquare].x-1;
         int yOff = tab[centerSquare].y-1;
 
@@ -389,22 +415,22 @@ public:
             tab1[s.x-xOff][s.y-yOff] = 1;
         }
 
+        //obrot klocka do drugiej tmp tablicy
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                     tab2[i][j] = tab1[2 - j][i];
             }
         }
 
-        //---------collision chk
+        //sprawdza kolizje i zakres
         for(int i = 0; i < 3; i++){
             for(int j = 0; j < 3; j++){
-                //::tab[i+xOff][j+yOff][0]==1
                 if((tab2[i][j] == 1 && !chkBord(j+yOff)) || ((::tab[i+xOff][j+yOff][0] == 1 && tab2[i][j] == 1) && chkSelf(i+xOff, j+yOff)))
                     return;
             }
         }
-        //----------
 
+        //daje klocku obrocone x i y (fill tab wypisuje )
         int s = 0;
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
@@ -423,7 +449,7 @@ public:
 
 extern std::vector<Brick> v;
 
-
+//metody na ostatnich (poruszanych przez gracza)/wszystkich/podanych klockach
 void fall(){
     v.back().fall();
 }
@@ -432,6 +458,14 @@ void fillTab(){
     for(auto i : v){
         i.fillTab();
     }
+}
+
+//czysci plansze
+void eraseTab(){
+    //----------------------------------------------clean everything
+    for (auto & i : ::tab)
+        for (auto & j : i)
+            j[0] = 0;
 }
 
 void movedown(int p) {
@@ -458,6 +492,7 @@ void rotate(){
     v.back().rotate();
 }
 
+//klocki
 class I : public Brick {
 public:
 

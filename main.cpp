@@ -3,8 +3,11 @@
 #include <unistd.h>
 #include <curses.h>
 #include <cstdlib>
+#include <limits>
 #include "headers.h"
 
+//tab - plansza z kolorem w ostatnim, pointx/pointy - pozycje w terminalu (tab[1][1] == 1 drukuje kwadrat w pozycji pointx[1] pointy[1] w terminalu)
+//next - nastepny klocek
 int tab[20][10][2] = {0};
 int pointx[20] = {};
 int pointy[10] = {};
@@ -12,15 +15,14 @@ int next;
 bool game = true;
 int score = 0;
 
+//slep - predkosc gry, skip - predkosc spadania klockow
 int slep = 1000;
 int skip = 400;
 
 std::vector<Brick> v;
 
 
-//----------move all down after scoring
-
-
+//sprawdza zapelnienie rzedow - jesli jest to dodaje pkt i usuwa oraz obniza jeszte
 void chkscore(){
     for(int i = 0; i < 20; i++) {
         bool score = true;
@@ -31,7 +33,6 @@ void chkscore(){
         if (score) {
             ::score += 100;
             deleteRow(i);
-            usleep(slep);
             movedown(i);
         }
     }
@@ -39,11 +40,12 @@ void chkscore(){
 
 
 void addBrick(){
-    // 1-sprawdza i obniza reszte 2-
     chkscore();
+    //sprawdza przegrana od postawienia pierwszego klocka
     if(v.size()>1)
         chkfail();
 
+    //dodaje dany klocek wylosowany poprzednio do zmiennej next i losuje nastepny
     switch(next){
         case 0:
             v.push_back(L());
@@ -72,6 +74,7 @@ void addBrick(){
 
 }
 
+//okienka i drukowanie
 class MainWindow {
 public:
     WINDOW * mainwin;
@@ -221,13 +224,7 @@ public:
     }
 };
 
-void eraseTab(){
-    //----------------------------------------------clean everything
-    for (auto & i : ::tab)
-        for (auto & j : i)
-            j[0] = 0;
-}
-
+//ruch i spadanie
 void move(int x) {
     Brick &b = v.back();
 
@@ -251,6 +248,7 @@ void move(int x) {
     flushinp();
 }
 
+//smierc z oknem smierci
 void death(){
     DeathWindow deathwin = DeathWindow();
     clear();
@@ -269,22 +267,20 @@ int main() {
     srand((unsigned)time(NULL));
     initPoint();
     initColors();
-
     noecho();
+
     //zmiana rozmiaru terminala
     std::cout<<"\e[8;45;79t";
 
+    //init
     initscr();
     curs_set(0);
     timeout(0);
     keypad(stdscr, TRUE);
 
+    //okna i pierwszy klocek
     MainWindow mainwin = MainWindow();
-
-    //next window
     NextWindow nextwin = NextWindow();
-
-    //debug window - score?
     ScoreWindow scorewin = ScoreWindow();
 
     ::next = rand()%7;
@@ -292,10 +288,11 @@ int main() {
 
     fillTab();
 
-
+    //czas gry
     int n = 0;
     while(game) {
 
+        //okienka
         wclear(mainwin.mainwin);
         mainwin.print();
 
@@ -307,23 +304,20 @@ int main() {
 
         wrefresh(mainwin.mainwin);
         wrefresh(nextwin.nextwin);
-
-        //debug
-//        for(int i = 0; i < 20; i++){
-//            for(int j = 0; j < 10; j++){
-//                mvwaddch(scorewin.scorewin, i+1, j+1, char(tab[i][j][0]+48));
-//            }
-//        }
-
         wrefresh(scorewin.scorewin);
 
-        //usleep(1050000);
+        //klatka gry, inkrementacja czasu i ruch klockow/spadanie
         usleep(slep);
         n++;
         if(n%skip==0)
             fall();
         move(getch());
 
+        //przekroczenie max wartosci int
+        if(n == std::numeric_limits<int>::max())
+            n = 0;
+
+        //czyszczenie planszy i zapelnienie na podstawie klockow
         eraseTab();
         fillTab();
     }
